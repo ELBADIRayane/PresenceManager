@@ -1,19 +1,71 @@
+
 package com.example.presencemanager
 
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import android.app.AlertDialog
+import android.view.Menu
+import android.view.MenuItem
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
+import android.widget.PopupMenu
 import android.text.util.Linkify
 import android.text.method.LinkMovementMethod
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.view.ActionMode
 
 class DashboardActivity : AppCompatActivity() {
+
+    private var actionMode: ActionMode? = null
+
+    private val cabCallback = object : ActionMode.Callback {
+
+        override fun onCreateActionMode(
+            mode: ActionMode,
+            menu: Menu
+        ): Boolean {
+            mode.menuInflater.inflate(R.menu.menu_cab_dashboard, menu)
+            mode.title = "Actions contextuelles"
+            return true
+        }
+
+        override fun onPrepareActionMode(
+            mode: ActionMode,
+            menu: Menu
+        ): Boolean = false
+
+        override fun onActionItemClicked(
+            mode: ActionMode,
+            item: MenuItem
+        ): Boolean {
+            return when (item.itemId) {
+
+                R.id.action_afficher -> {
+                    AlertDialog.Builder(this@DashboardActivity)
+                        .setTitle("CAB")
+                        .setMessage("Action Afficher exécutée.")
+                        .setPositiveButton("OK", null)
+                        .show()
+                    true
+                }
+
+                R.id.action_terminer -> {
+                    mode.finish()
+                    true
+                }
+
+                else -> false
+            }
+        }
+
+        override fun onDestroyActionMode(mode: ActionMode) {
+            actionMode = null
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,6 +76,14 @@ class DashboardActivity : AppCompatActivity() {
         val cardHistorique = findViewById<View>(R.id.cardHistorique)
         val cardStatistiques = findViewById<View>(R.id.cardStatistiques)
         val imgProfil = findViewById<ImageView>(R.id.imgProfil)
+        val btnCab = findViewById<View>(R.id.btnCab)
+        val btnPopup = findViewById<View>(R.id.btnPopup)
+
+        btnCab.setOnClickListener {
+            if (actionMode == null) {
+                actionMode = startSupportActionMode(cabCallback)
+            }
+        }
 
         val detecteur = GestureDetector(
             this,
@@ -41,7 +101,6 @@ class DashboardActivity : AppCompatActivity() {
                         )
                         .setPositiveButton("OK", null)
                         .show()
-
                     return true
                 }
             }
@@ -49,7 +108,6 @@ class DashboardActivity : AppCompatActivity() {
 
         imgProfil.setOnTouchListener { _, evenement ->
             detecteur.onTouchEvent(evenement)
-            true
         }
 
         cardGroupes.setOnClickListener {
@@ -84,6 +142,42 @@ class DashboardActivity : AppCompatActivity() {
                 Toast.LENGTH_SHORT
             ).show()
             true
+        }
+
+        btnPopup.setOnClickListener {
+            val popupMenu = PopupMenu(this, btnPopup)
+
+            popupMenu.menuInflater.inflate(
+                R.menu.menu_popup_dashboard,
+                popupMenu.menu
+            )
+
+            popupMenu.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+
+                    R.id.action_ouvrir_groupes -> {
+                        startActivity(
+                            Intent(this, GroupesActivity::class.java)
+                        )
+                        true
+                    }
+
+                    R.id.action_informations -> {
+                        AlertDialog.Builder(this)
+                            .setTitle("PrésenceManager")
+                            .setMessage(
+                                "Menu contextuel flottant du tableau de bord."
+                            )
+                            .setPositiveButton("OK", null)
+                            .show()
+                        true
+                    }
+
+                    else -> false
+                }
+            }
+
+            popupMenu.show()
         }
 
         findViewById<TextView>(R.id.txtFooterDashboard).setOnClickListener {

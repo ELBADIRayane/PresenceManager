@@ -1,8 +1,3 @@
 <resources>
     <string name="app_name">PresenceManager</string>
-    <string name="groups_title">Liste des groupes</string>
-    <string name="group_icon_description">Groupe</string>
-    <string name="group_size">Effectif : %1$d stagiaires</string>
-    <string name="group_count">%1$d stagiaires</string>
-    <string name="ok">OK</string>
 </resources>
